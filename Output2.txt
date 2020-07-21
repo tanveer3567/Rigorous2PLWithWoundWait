@@ -1,0 +1,416 @@
+Operation: b1; create a record of t1 in tt
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  []                              []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+
+
+Operation: r1 (Y);t1 acquires RL on Y
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Read_Lock                       [1]                   []
+
+
+Operation: w1 (Y);t1 upgrades RL to WL on Y
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   []
+
+
+Operation: r1 (Z);t1 acquires RL on Z
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y, z]                          []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   []
+z              Read_Lock                       [1]                   []
+
+
+Operation: b2;create a record of t2 in TT
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y, z]                          []
+2        2019-07-26 18:08:30.074        Active                  []                              []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   []
+z              Read_Lock                       [1]                   []
+
+
+Operation: r2 (X);t2 acquires RL on X
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y, z]                          []
+2        2019-07-26 18:08:30.074        Active                  [x]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   []
+z              Read_Lock                       [1]                   []
+x              Read_Lock                       [2]                   []
+
+
+Operation: w2 (X);t2 upgrades RL to WL on X
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y, z]                          []
+2        2019-07-26 18:08:30.074        Active                  [x]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   []
+z              Read_Lock                       [1]                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: w1 (Z);t1 upgrades RL to WL on Z
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y, z]                          []
+2        2019-07-26 18:08:30.074        Active                  [x]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   []
+z              Write_Lock                       [1]                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: r2 (Y);based on wound-wait, T2 is blocked (waits on Y held by T1)
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 Active                  [y, z]                          []
+2        2019-07-26 18:08:30.074        BLOCKED                 [x]                             [r2(y)]
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [1]                   [2]
+z              Write_Lock                       [1]                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: e1;
+As T1 is COMMITED waiting transaction on T1 that is T2 is unblocked and tries to excecute its queued operation r2(y)
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        ACTIVE                  [x, y]                          []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Read_Lock                       [2]                   []
+z              Unlock                       []                   []
+x              Write_Lock                       [2]                   []
+
+
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        ACTIVE                  [x, y]                          []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Read_Lock                       [2]                   []
+z              Unlock                       []                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: b3;create a record of t3 in tt
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        ACTIVE                  [x, y]                          []
+3        2019-07-26 18:08:30.569        Active                  []                              []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Read_Lock                       [2]                   []
+z              Unlock                       []                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: r3 (Z); t3 acquires RL on Z
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        ACTIVE                  [x, y]                          []
+3        2019-07-26 18:08:30.569        Active                  [z]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Read_Lock                       [2]                   []
+z              Read_Lock                       [3]                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: w3 (Z); t3 upgrades RL to WL on Z
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        ACTIVE                  [x, y]                          []
+3        2019-07-26 18:08:30.569        Active                  [z]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Read_Lock                       [2]                   []
+z              Write_Lock                       [3]                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: w2 (Y);t3 acquires WL on Y
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        ACTIVE                  [x, y]                          []
+3        2019-07-26 18:08:30.569        Active                  [z]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Write_Lock                       [2]                   []
+z              Write_Lock                       [3]                   []
+x              Write_Lock                       [2]                   []
+
+
+Operation: e2;t2 commits and releases all locks
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        Active                  [z]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Write_Lock                       [3]                   []
+x              Unlock                       []                   []
+
+
+Operation: r3 (X);t3 acquires RL on X
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        Active                  [z, x]                          []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Write_Lock                       [3]                   []
+x              Read_Lock                       [3]                   []
+
+
+Operation: w3 (X);t3 upgrades RL to WL on X
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        Active                  [z, x]                          []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Write_Lock                       [3]                   []
+x              Write_Lock                       [3]                   []
+
+
+Operation: b4;create a record of t4 in tt
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        Active                  [z, x]                          []
+4        2019-07-26 18:08:31.036        Active                  []                              []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Write_Lock                       [3]                   []
+x              Write_Lock                       [3]                   []
+
+
+Operation: w4(X);based on wound-wait, T4 is blocked (waits on X held by t3)
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        Active                  [z, x]                          []
+4        2019-07-26 18:08:31.036        BLOCKED                 []                              [w4(x)]
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Write_Lock                       [3]                   []
+x              Write_Lock                       [3]                   [4]
+
+
+Operation: e3;
+As T3 is COMMITED waiting transaction on T3 that is T4 is unblocked and tries to excecute its queued operation w4(x)
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        COMMITED                        null                            null
+4        2019-07-26 18:08:31.036        ACTIVE                  [x]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Unlock                       []                   []
+x              Write_Lock                       [4]                   []
+
+
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        COMMITED                        null                            null
+4        2019-07-26 18:08:31.036        ACTIVE                  [x]                             []
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Unlock                       []                   []
+x              Write_Lock                       [4]                   []
+
+
+Operation: e4;t4 commits and releases all locks
+*******************************************************************************************************************************
+
+TRANSACTION TABLE :
+
+Id       Timestamp                      State                   Locked Data Items               Queued Operations
+1        2019-07-26 18:08:29.82 COMMITED                        null                            null
+2        2019-07-26 18:08:30.074        COMMITED                        null                            null
+3        2019-07-26 18:08:30.569        COMMITED                        null                            null
+4        2019-07-26 18:08:31.036        COMMITED                        null                            null
+
+
+LOCK TABLE :
+
+Data Item      Type                    Accessing Tid's          Waiting Tid's
+y              Unlock                       []                   []
+z              Unlock                       []                   []
+x              Unlock                       []                   []
